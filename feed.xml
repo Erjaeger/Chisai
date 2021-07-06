@@ -1,0 +1,49 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+<atom:link href="https://erjaeger.github.io/Chisai/feed.xml" rel="self" type="application/rss+xml" />
+<title>Midori | Chīsai, a small and ready to use micro-site generator.</title>
+<link>https://erjaeger.github.io/Chisai/</link>
+<description>Midori — Chīsai, a small and ready to use micro-site generator.</description>
+<lastBuildDate>2021-07-06</lastBuildDate>
+<image>
+  <url>https://erjaeger.github.io/Chisai/assets/rss.png</url>
+  <title>Midori — Chīsai, a small and ready to use micro-site generator.</title>
+<link>https://erjaeger.github.io/Chisai/</link>
+</image>
+<item>
+  <title>Blog</title>
+  <link>https://erjaeger.github.io/Chisai/blog.html</link>
+  <guid isPermaLink="false">https://erjaeger.github.io/Chisai/blog.html</guid>
+  <pubDate>2021-07-06 22:58:55</pubDate>
+<description>
+<![CDATA[<h1>Blog</h1>
+<p>I post my artist progress here!</p>
+<ul class='listing'><li><h3><a href='01-01-2021.html'>Test!</a></h3><small>01-01-2021</small> <img src='https://erjaeger.github.io/Chisai/medias/chihiro.jpg'/></li>
+</ul>]]>
+  </description>
+</item><item>
+  <title>Recette</title>
+  <link>https://erjaeger.github.io/Chisai/recettes.html</link>
+  <guid isPermaLink="false">https://erjaeger.github.io/Chisai/recettes.html</guid>
+  <pubDate>2021-07-06 22:58:55</pubDate>
+<description>
+<![CDATA[<h1>Recette</h1>
+<p>Ici je vous partagerai les différentes recettes que j'ai pu concocter !</p>
+<p><img src="https://erjaeger.github.io/Chisai/medias/kaguya.png" alt="https://erjaeger.github.io/Chisai/medias/kaguya.png"></p>
+<ul class='listing'></ul>]]>
+  </description>
+</item><item>
+  <title>Test!</title>
+  <link>https://erjaeger.github.io/Chisai/01-01-2021.html</link>
+  <guid isPermaLink="false">https://erjaeger.github.io/Chisai/01-01-2021.html</guid>
+  <pubDate>2021-01-01 00:00:00</pubDate>
+<description>
+<![CDATA[<h1>Test!</h1>
+<p><img src="https://erjaeger.github.io/Chisai/medias/chihiro.jpg" alt="Test image cover"></p>
+<p><em>Description Text of the article</em></p>
+<p>Happy new year to all of you!</p>
+]]>
+  </description>
+</item>
+</channel>
+</rss>
