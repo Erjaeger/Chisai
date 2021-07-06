@@ -1,4 +1,4 @@
-content_folder = ['art', 'blog', 'naming-demo']
+content_folder = ['blog', 'recettes']
 relative_build_url = "/"
 absolute_build_url = "https://erjaeger.github.io/Chisai/"
 build_folder = "build/"
@@ -8,11 +8,12 @@ template_file = "partials/main.html"
 template_nav = "partials/nav.html"
 rss_template = "partials/rss.xml"
 rss_item_template = "partials/item.xml"
-name_of_site = "logyin"
+name_of_site = "Midori"
 site_meta_description = "Chīsai, a small and ready to use micro-site generator."
 twitter_name = "@thomasorus"
 home_name = "Home"
 see_all = "See more"
 go_back = "Go back to"
 date_format = "EU"  # Choose between EU day-month-year or ISO year-mont-day
-flat_build = True # True or False, if True, all files will be written in the root of the website
+# True or False, if True, all files will be written in the root of the website
+flat_build = True

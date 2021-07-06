@@ -1,4 +1,3 @@
-
 import argparse
 import glob
 import os
@@ -7,7 +6,7 @@ import re
 import shutil
 import subprocess
 import sys
-from datetime import datetime
+from datetime import datetime, time
 import pathlib
 
 # Default encoding
@@ -101,19 +100,34 @@ def generate_html_pages(site_folder, entries, template, sub_pages_list, template
 
     print("All pages created!")
 
+# Get title / cover / description by parsing and cleaning the line of the markdown file
 
-# Get title by parsing and cleaning the first line of the markdown file
-def get_entry_title(page):
+
+def get_entry_informations(page):
+    informations = {
+        "title": None,
+        "cover": None,
+        "description": None,
+    }
     pageContent = open(page, 'r')
     textContent = pageContent.read()
     textContent = textContent.splitlines()
-    textContent = textContent[0]
-    textContent = textContent.replace('# ', '')
+    titleContent = textContent[0]
+    informations["title"] = titleContent.replace('# ', '')
 
-    return textContent
+    # Iterate on the text to find the first image to use as a cover
+    for element in textContent:
+        imageTemp = re.search(r"!\[.*]\((.*)\)", element)
+        if imageTemp:
+            informations["cover"] = build_url + \
+                config.medias_folder + imageTemp.group(1)
+            break
 
+    return informations
 
 # Get the slug from the markdown file name
+
+
 def get_entry_slug(page):
     slug = page.split("/")[-1]
     slug = re.sub('\.md$', '', slug)
@@ -187,7 +201,10 @@ def create_entries(pages):
 
         # Process the page with dedicated functions
         path = clean_path(page)
-        title = get_entry_title(page)
+        informations = get_entry_informations(page)
+        title = informations["title"]
+        cover = informations["cover"]
+        # description = get_description_cover(page)
 
         markdown_text = open(page, 'r').read()
         markdown_text = style_iframes(markdown_text)
@@ -204,6 +221,7 @@ def create_entries(pages):
         tempPage['date'] = path['date']
         tempPage['iso_date'] = path['iso_date']
         tempPage['title'] = fix_amp(title)
+        tempPage['cover'] = cover
         tempPage['pageContent'] = pageContent
 
         fullContent.append(tempPage)
@@ -226,6 +244,7 @@ def move_files(site_folder, path):
 # Transforms the file locations to an array of strings
 def clean_path(path):
     path_clean = re.sub('\.md$', '', path)
+    print(path_clean)
     items = []
     if(platform.system() == 'Windows'):
         items = path_clean.split('\\')
@@ -246,10 +265,9 @@ def clean_path(path):
     regex = r"(?:[0-9]{2}-){2}[0-9]{4}"
     match = re.match(regex, path_items["file"])
     has_date = False
-
     if match:
         has_date = True
-
+    print(has_date)
     if has_date:
         if match[0] != path_items["file"]:
             path_items["date"] = match[0]
@@ -268,15 +286,25 @@ def clean_path(path):
                 datetime.strptime(path_items["date"], '%Y-%m-%d'))
     else:
         path_items["slug"] = path_items["file"] + ".html"
-
         last_edit = str(subprocess.check_output(
             'git log -1 --format="%ci" ' + path, shell=True)).replace("b'", "").replace("\\n'", '')
-        last_edit_iso = datetime.strptime(last_edit[:-6], "%Y-%m-%d %H:%M:%S")
+        if last_edit == '\'':
+            last_edit = pathlib.Path(path).stat().st_mtime
+            # last_edit = datetime.datetime.fromtimestamp(
+            #     last_edit).strftime('%Y-%m-%d %H:%M:%S')
+            print("LAAA")
+            last_edit_iso = datetime.fromtimestamp(
+                last_edit)
+            print(type(last_edit_iso))
+        else:
+            print("ICIICICI")
+            last_edit_iso = datetime.strptime(
+                last_edit[:-6], "%Y-%m-%d %H:%M:%S")
+            print(type(last_edit_iso))
 
         if config.date_format == "EU":
             path_items["date"] = str(
                 last_edit_iso.strftime("%d-%m-%Y %H:%M:%S"))
-            print(path_items["date"])
         else:
             path_items["date"] = str(last_edit_iso)
 
@@ -323,7 +351,8 @@ def generate_sub_pages(entries, num, folder, title):
         if entry["file"] != "index":
             entry_string = "<li><h3><a href='" + link_url + \
                 "'>" + entry["title"] + "</a></h3><small>" + \
-                entry["date"] + "</small></li>\n"
+                entry["date"] + "</small> <img src='" + \
+                entry['cover']+"'/></li>\n"
             sub_page_list += entry_string
     sub_page_list += "</ul>"
 
@@ -355,6 +384,16 @@ def create_home_page(template, site_folder):
     template = template.replace('page_navigation', "")
 
     return template
+
+# Create the nav menu from the config folders
+
+
+def create_nav_menu():
+    nav = '<ul>'
+    for folder in config.content_folder:
+        # nav += f'<li><a href="{config.absolute_build_url}/{folder}/index.html">{folder}</a></li>'
+        nav += f'<li><a href="./{folder}.html">{folder}</a></li>'
+    return nav
 
 
 # Create RSS Feed
@@ -408,6 +447,9 @@ def generate_website():
     # Create home page
     home_page = create_home_page(template, config.build_folder)
 
+    # Create the nav menu
+    nav_menu = create_nav_menu()
+
     rss_entries = []
 
     for folder in config.content_folder:
@@ -440,6 +482,8 @@ def generate_website():
                                   config.site_meta_description)
     home_page = home_page.replace(
         'twitter_name', config.twitter_name)
+
+    home_page = home_page.replace('main_nav', nav_menu)
 
     slug_file = config.build_folder + "index.html"
     with open(slug_file, 'w', encoding=encoding) as fobj:
