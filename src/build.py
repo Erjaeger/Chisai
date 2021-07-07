@@ -98,7 +98,8 @@ def generate_html_pages(site_folder, entries, template, sub_pages_list, template
         with open(slug_file, 'w', encoding=encoding) as fobj:
             fobj.write(page_template)
 
-    print("All pages created!")
+
+print("All pages created!")
 
 # Get title / cover / description by parsing and cleaning the line of the markdown file
 
@@ -244,7 +245,6 @@ def move_files(site_folder, path):
 # Transforms the file locations to an array of strings
 def clean_path(path):
     path_clean = re.sub('\.md$', '', path)
-    print(path_clean)
     items = []
     if(platform.system() == 'Windows'):
         items = path_clean.split('\\')
@@ -267,7 +267,7 @@ def clean_path(path):
     has_date = False
     if match:
         has_date = True
-    print(has_date)
+
     if has_date:
         if match[0] != path_items["file"]:
             path_items["date"] = match[0]
@@ -288,19 +288,14 @@ def clean_path(path):
         path_items["slug"] = path_items["file"] + ".html"
         last_edit = str(subprocess.check_output(
             'git log -1 --format="%ci" ' + path, shell=True)).replace("b'", "").replace("\\n'", '')
-        if last_edit == '\'':
+        if last_edit == '\'':  # If it's a new local file, git log doesn't return a last updated date
+            # getting the os last updated date instead
             last_edit = pathlib.Path(path).stat().st_mtime
-            # last_edit = datetime.datetime.fromtimestamp(
-            #     last_edit).strftime('%Y-%m-%d %H:%M:%S')
-            print("LAAA")
             last_edit_iso = datetime.fromtimestamp(
                 last_edit)
-            print(type(last_edit_iso))
         else:
-            print("ICIICICI")
             last_edit_iso = datetime.strptime(
                 last_edit[:-6], "%Y-%m-%d %H:%M:%S")
-            print(type(last_edit_iso))
 
         if config.date_format == "EU":
             path_items["date"] = str(
@@ -333,7 +328,7 @@ def clean_path(path):
 
 # Generate the list of sub pages for each section
 def generate_sub_pages(entries, num, folder, title):
-
+    print(type(entries))
     # Sort entries by date using the iso_date format
     entries.sort(key=lambda x: x["iso_date"], reverse=True)
 
@@ -343,6 +338,7 @@ def generate_sub_pages(entries, num, folder, title):
     # Create the list
     sub_page_list = "<ul class='listing'>"
     for entry in selected_entries:
+        print(entry)
         if title:
             link_url = entry["slug"]
         else:
@@ -351,9 +347,14 @@ def generate_sub_pages(entries, num, folder, title):
         if entry["file"] != "index":
             entry_string = "<li><h3><a href='" + link_url + \
                 "'>" + entry["title"] + "</a></h3><small>" + \
-                entry["date"] + "</small> <img src='" + \
-                entry['cover']+"'/></li>\n"
+                entry["date"] + "</small> </li>\n"
             sub_page_list += entry_string
+            # TODO fix if no image on cover
+            # entry_string = "<li><h3><a href='" + link_url + \
+            #     "'>" + entry["title"] + "</a></h3><small>" + \
+            #     entry["date"] + "</small> <img src='" + \
+            #     entry['cover']+"'/></li>\n"
+            # sub_page_list += entry_string
     sub_page_list += "</ul>"
 
     # If a title is necessary, use the folder name
@@ -395,8 +396,9 @@ def create_nav_menu():
         nav += f'<li><a href="./{folder}.html">{folder}</a></li>'
     return nav
 
-
 # Create RSS Feed
+
+
 def create_rss_feed(rss_entries, rss_template, rss_item_template, site_folder):
     template = open(rss_template, 'r').read()
     itemTemplate = open(rss_item_template, 'r').read()
@@ -452,11 +454,20 @@ def generate_website():
 
     rss_entries = []
 
+    recent_entry = []
+
     for folder in config.content_folder:
         pages = glob.glob(folder + '**/*.md', recursive=True)
         entries = create_entries(pages)
+
+        # Finding the last article
+        for e in entries:
+            if len(recent_entry) == 0 or (e['iso_date'] > recent_entry[0]['iso_date']):
+                recent_entry = [e]
+
         sub_pages_list = generate_sub_pages(
             entries, len(entries), folder, False)
+        # print(sub_pages_list)
 
         # For each section, create a short listing of sub pages and add it to the home page
         home_pageSubList = generate_sub_pages(entries, 5, folder, True)
@@ -470,12 +481,19 @@ def generate_website():
         for entry in entries:
             rss_entries.append(entry)
 
-     # Move the assets
+    print(recent_entry)
+    last_generated_article = generate_sub_pages(
+        recent_entry, 1, recent_entry[0]['folder'], False)
+    print(last_generated_article)
+
+    # Move the assets
     move_files(config.build_folder, config.assets_folder)
     move_files(config.build_folder, config.medias_folder)
 
     # Once all sections have been processed, finish the home page
     # Removes the "content_list" in the partial
+
+    home_page = home_page.replace('last_article', last_generated_article)
     home_page = home_page.replace('content_list', "")
     home_page = home_page.replace('name_of_site', config.name_of_site)
     home_page = home_page.replace('site_meta_description',
