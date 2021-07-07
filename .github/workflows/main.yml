@@ -5,18 +5,16 @@ on: push
 jobs:
   publish:
     runs-on: ubuntu-latest
+    if: github.red == 'refs/heads/master'
     steps:
-      -
-        name: Checkout
+      - name: Checkout
         uses: actions/checkout@v2
-      -
-        name: Generate Chisai
+      - name: Generate Chisai
         run: python3 src/build.py --prod
       #-
-        #name: Create cname file
-        # run: echo 'mydomain.com' > build/CNAME
-      -
-        name: Deploy to GitHub Pages
+      #name: Create cname file
+      # run: echo 'mydomain.com' > build/CNAME
+      - name: Deploy to GitHub Pages
         if: success()
         uses: crazy-max/ghaction-github-pages@v2
         with:

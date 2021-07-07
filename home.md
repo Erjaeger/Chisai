@@ -1,3 +1,3 @@
 # Hello!
 
-This is the home page of Chīsai, a small static site generator.
+This is the home page of Midori, a vegetarian cooking blog !
