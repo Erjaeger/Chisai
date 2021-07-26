@@ -38,6 +38,7 @@ if args.prod:
 def generate_html_pages(site_folder, entries, template, sub_pages_list, template_nav):
     for entry in entries:
         page_template = template.replace('page_title', entry['title'])
+        page_template = template.replace('main_nav', create_nav_menu())
 
         # Checking if the page is root of a folder
         if entry["file"] == "index":
@@ -115,6 +116,7 @@ def get_entry_informations(page):
     textContent = textContent.splitlines()
     titleContent = textContent[0]
     informations["title"] = titleContent.replace('# ', '')
+    informations["description"] = textContent[2]
 
     # Iterate on the text to find the first image to use as a cover
     for element in textContent:
@@ -205,7 +207,7 @@ def create_entries(pages):
         informations = get_entry_informations(page)
         title = informations["title"]
         cover = informations["cover"]
-        # description = get_description_cover(page)
+        description = informations["description"]
 
         markdown_text = open(page, 'r').read()
         markdown_text = style_iframes(markdown_text)
@@ -224,6 +226,7 @@ def create_entries(pages):
         tempPage['title'] = fix_amp(title)
         tempPage['cover'] = cover
         tempPage['pageContent'] = pageContent
+        tempPage['description'] = description
 
         fullContent.append(tempPage)
 
@@ -327,34 +330,77 @@ def clean_path(path):
 
 
 # Generate the list of sub pages for each section
-def generate_sub_pages(entries, num, folder, title):
-    print(type(entries))
+def generate_sub_pages(entries, num, folder, title, last_article=False):
     # Sort entries by date using the iso_date format
     entries.sort(key=lambda x: x["iso_date"], reverse=True)
 
     # Take n number of entries (5 for the home, all for the sub-section pages)
     selected_entries = entries[:num]
 
+    liClass = "class='last_article'" if last_article == True else ""
+
     # Create the list
     sub_page_list = "<ul class='listing'>"
     for entry in selected_entries:
-        print(entry)
         if title:
             link_url = entry["slug"]
         else:
             link_url = entry["file"] + ".html"
 
         if entry["file"] != "index":
-            entry_string = "<li><h3><a href='" + link_url + \
-                "'>" + entry["title"] + "</a></h3><small>" + \
-                entry["date"] + "</small> </li>\n"
+            if(entry['cover'] != None):
+                entry_string = "<li "+liClass+"><img src='" + \
+                    entry['cover']+"'/><h3><a href='" + link_url + \
+                    "'>" + entry["title"] + "</a></h3><small>" + \
+                    entry["date"] + "</small> <p> " + \
+                    entry['description'] + " </p> </li>\n"
+            else:
+                entry_string = "<li "+liClass+"><h3><a href='" + link_url + \
+                    "'>" + entry["title"] + "</a></h3><small>" + \
+                    entry["date"] + "</small> </li>\n"
             sub_page_list += entry_string
-            # TODO fix if no image on cover
-            # entry_string = "<li><h3><a href='" + link_url + \
-            #     "'>" + entry["title"] + "</a></h3><small>" + \
-            #     entry["date"] + "</small> <img src='" + \
-            #     entry['cover']+"'/></li>\n"
-            # sub_page_list += entry_string
+    sub_page_list += "</ul>"
+
+    # If a title is necessary, use the folder name
+    if title:
+        title = "<h2>%s</h2>" % folder.capitalize()
+        sub_page_list = title + sub_page_list
+        if config.flat_build:
+            sub_page_link = build_url + folder + ".html"
+        else:
+            sub_page_link = build_url + folder
+        sub_page_link_html = "<small><a href='%s'>" % sub_page_link + \
+            config.see_all + "</a></small>"
+        sub_page_list += sub_page_link_html
+
+    return sub_page_list
+
+
+# Generate the list of sub pages for each section
+def generate_last_article(entries, num, folder, title):
+    # Sort entries by date using the iso_date format
+    entries.sort(key=lambda x: x["iso_date"], reverse=True)
+
+    # Take n number of entries (5 for the home, all for the sub-section pages)
+    selected_entries = entries[:num]
+
+    liClass = "class='last_article'"
+
+    # Create the list
+    sub_page_list = "<ul>"
+    for entry in selected_entries:
+        if title:
+            link_url = entry["slug"]
+        else:
+            link_url = entry["file"] + ".html"
+
+        if entry["file"] != "index":
+            entryCover = "<img src='" + \
+                entry['cover']+"'/>" if entry['cover'] != None else ""
+            entry_string = "<li "+liClass+"><div><h3><a href='" + link_url + \
+                "'>" + entry["title"] + "</a></h3><small>" + \
+                entry["date"] + "</small></div>"+entryCover+"</li>\n"
+            sub_page_list += entry_string
     sub_page_list += "</ul>"
 
     # If a title is necessary, use the folder name
@@ -376,7 +422,7 @@ def generate_sub_pages(entries, num, folder, title):
 def create_home_page(template, site_folder):
 
     # Read the file and add "content_list" as a future replacement point for sub page listing
-    html = markdown(open("home.md", "r").read()) + "content_list"
+    html = markdown(open("home.md", "r").read()) + "last_article content_list"
 
     # Replace template strings with content
     template = template.replace('page_title', config.home_name)
@@ -467,7 +513,6 @@ def generate_website():
 
         sub_pages_list = generate_sub_pages(
             entries, len(entries), folder, False)
-        # print(sub_pages_list)
 
         # For each section, create a short listing of sub pages and add it to the home page
         home_pageSubList = generate_sub_pages(entries, 5, folder, True)
@@ -481,10 +526,9 @@ def generate_website():
         for entry in entries:
             rss_entries.append(entry)
 
-    print(recent_entry)
-    last_generated_article = generate_sub_pages(
+    last_generated_article = generate_last_article(
         recent_entry, 1, recent_entry[0]['folder'], False)
-    print(last_generated_article)
+    last_article_part = '<h2>Mon dernier article</h2>' + last_generated_article
 
     # Move the assets
     move_files(config.build_folder, config.assets_folder)
@@ -493,7 +537,7 @@ def generate_website():
     # Once all sections have been processed, finish the home page
     # Removes the "content_list" in the partial
 
-    home_page = home_page.replace('last_article', last_generated_article)
+    home_page = home_page.replace('last_article', last_article_part)
     home_page = home_page.replace('content_list', "")
     home_page = home_page.replace('name_of_site', config.name_of_site)
     home_page = home_page.replace('site_meta_description',

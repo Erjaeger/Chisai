@@ -158,11 +158,13 @@ h2 {
 }
 
 h3 {
-  font-size: var(--s0);
+  font-size: var(--s1);
   color: var(--text);
 }
 
 main {
+  width: 80%;
+  margin: auto;
   padding: var(--s0);
   padding: var(--s-1);
   /* background-image: var(--dots);
@@ -189,6 +191,24 @@ li {
   list-style-type: none;
 }
 
+li > img {
+  overflow: hidden;
+}
+
+li.last_article {
+  display: flex;
+  flex-direction: row-reverse;
+}
+
+li.last_article > div {
+  display: flex;
+  flex-direction: column;
+}
+
+li.last_article > div > h3 {
+  font-size: var(--s3);
+}
+
 nav > ul {
   display: flex;
   flex-direction: row;
@@ -203,7 +223,7 @@ nav > ul {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  max-width: 60ch;
+  max-width: 100%;
   margin-left: auto;
   margin-right: auto;
   padding: 0 var(--s0);
@@ -241,6 +261,19 @@ nav > ul {
   height: 100%;
   left: 0;
   right: 0;
+}
+
+ul.listing {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+ul.listing > li {
+  width: 30%;
+  background-color: rebeccapurple;
+  padding: var(--s-1);
 }
 
 .listing {
