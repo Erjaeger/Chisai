@@ -377,7 +377,7 @@ def generate_sub_pages(entries, num, folder, title, last_article=False):
 
 
 # Generate the list of sub pages for each section
-def generate_last_article(entries, num, folder, title):
+def generate_last_article(entries, num, folder, title, mainArticle=False):
     # Sort entries by date using the iso_date format
     entries.sort(key=lambda x: x["iso_date"], reverse=True)
 
@@ -385,6 +385,7 @@ def generate_last_article(entries, num, folder, title):
     selected_entries = entries[:num]
 
     liClass = "class='last_article'"
+    lastArticleMention = "<p class='newArticleMention'>Nouvel article</p>" if mainArticle == True else ""
 
     # Create the list
     sub_page_list = "<ul>"
@@ -397,23 +398,24 @@ def generate_last_article(entries, num, folder, title):
         if entry["file"] != "index":
             entryCover = "<img src='" + \
                 entry['cover']+"'/>" if entry['cover'] != None else ""
-            entry_string = "<li "+liClass+"><div><h3><a href='" + link_url + \
+            entry_string = "<li "+liClass+"><div>"+lastArticleMention+"<h3><a href='" + link_url + \
                 "'>" + entry["title"] + "</a></h3><small>" + \
-                entry["date"] + "</small></div>"+entryCover+"</li>\n"
+                entry["date"] + "</small><p>"+entry['description'] + \
+                "</p></div>"+entryCover+"</li>\n"
             sub_page_list += entry_string
     sub_page_list += "</ul>"
 
-    # If a title is necessary, use the folder name
-    if title:
-        title = "<h2>%s</h2>" % folder.capitalize()
-        sub_page_list = title + sub_page_list
-        if config.flat_build:
-            sub_page_link = build_url + folder + ".html"
-        else:
-            sub_page_link = build_url + folder
-        sub_page_link_html = "<small><a href='%s'>" % sub_page_link + \
-            config.see_all + "</a></small>"
-        sub_page_list += sub_page_link_html
+    # # If a title is necessary, use the folder name
+    # if title:
+    #     title = "<h2>%s</h2>" % folder.capitalize()
+    #     sub_page_list = title + sub_page_list
+    #     if config.flat_build:
+    #         sub_page_link = build_url + folder + ".html"
+    #     else:
+    #         sub_page_link = build_url + folder
+    #     sub_page_link_html = "<small><a href='%s'>" % sub_page_link + \
+    #         config.see_all + "</a></small>"
+    #     sub_page_list += sub_page_link_html
 
     return sub_page_list
 
@@ -527,8 +529,8 @@ def generate_website():
             rss_entries.append(entry)
 
     last_generated_article = generate_last_article(
-        recent_entry, 1, recent_entry[0]['folder'], False)
-    last_article_part = '<h2>Mon dernier article</h2>' + last_generated_article
+        recent_entry, 1, recent_entry[0]['folder'], False, True)
+    last_article_part = last_generated_article
 
     # Move the assets
     move_files(config.build_folder, config.assets_folder)

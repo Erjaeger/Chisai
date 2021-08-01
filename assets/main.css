@@ -81,6 +81,11 @@ select {
   src: url("./DawningofaNewDay-Regular.ttf");
 }
 
+@font-face {
+  font-family: "Poppins";
+  src: url("./Poppins-Regular.ttf");
+}
+
 /* CHISAI CSS BY THOMASORUS */
 
 :root {
@@ -105,17 +110,16 @@ select {
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --text: white;
-    --background: black;
+    --text: #2b2b2b;
+    --background: #f6f6f6;
     --dots: radial-gradient(white 1px, transparent 1px),
       radial-gradient(white 1px, transparent 1px);
   }
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
-    "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
-    "Segoe UI Symbol";
+  font-family: "Poppins", "Roboto", "Helvetica Neue", Arial, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   background-color: var(--background);
   color: var(--text);
 }
@@ -125,6 +129,16 @@ header {
   text-align: center;
   font-size: var(--s1);
   padding-top: var(--s3);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+header div.lineSeparator {
+  width: 80%;
+  height: 1px;
+  background-color: #959595;
 }
 
 header nav {
@@ -135,6 +149,8 @@ header nav {
 header h1 {
   color: var(--text);
   font-family: "DawningOfANewDay";
+  font-size: 4rem;
+  padding: 0 var(--s0);
 }
 
 a {
@@ -172,6 +188,15 @@ main {
   background-position: 0 0, calc(2 * 1px) calc(2 * 1px); */
 }
 
+p {
+  font-weight: 1.125rem;
+}
+
+p.newArticleMention {
+  font-size: 1rem;
+  font-weight: 400;
+}
+
 article {
   background-color: var(--background);
   padding: var(--s0);
@@ -189,6 +214,7 @@ main date {
 li {
   line-height: 1.3;
   list-style-type: none;
+  text-transform: capitalize;
 }
 
 li > img {
@@ -203,6 +229,9 @@ li.last_article {
 li.last_article > div {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  margin-left: var(--s3);
 }
 
 li.last_article > div > h3 {
@@ -214,8 +243,6 @@ nav > ul {
   flex-direction: row;
   align-items: center;
   justify-content: space-evenly;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #49b897;
 }
 
 .container {
@@ -238,7 +265,7 @@ nav > ul {
 }
 
 .flow-large > * + * {
-  margin-top: var(--s2);
+  margin-top: var(--s0);
 }
 
 .logo {
